@@ -1061,7 +1061,9 @@
          (-> col
              (update :pk? pos?)
              (update :database-required pos?)
-             (update :database-is-auto-increment pos?)))))
+             (update :database-is-auto-increment pos?)
+             (update :database-is-nullable pos?)
+             (update :database-is-generated pos?)))))
 
 (defmethod sql-jdbc.sync/describe-fields-sql :mysql
   [driver & {:keys [table-names details]}]
@@ -1079,6 +1081,9 @@
                           [:not [:= :c.extra [:inline "auto_increment"]]]]
                          :database-required]
                         [[:= :c.column_key [:inline "PRI"]] :pk?]
+                        [[:= :is_nullable [:inline "YES"]] :database-is-nullable]
+                        [[:if [:= [:lower :column_default] [:inline "null"]] nil :column_default] :database-default]
+                        [[:or [:like :extra "%STORED GENERATED%"] [:like :extra "VIRTUAL GENERATED"]] :database-is-generated]
                         [[:nullif :c.column_comment [:inline ""]] :field-comment]]
                :from [[:information_schema.columns :c]]
                :where
