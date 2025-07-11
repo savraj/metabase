@@ -66,15 +66,14 @@ printBold(`Running Cypress with options:
 `);
 
 const init = async () => {
-  if (options.START_CONTAINERS) {
-    printBold("⏳ Starting containers");
-    shell("docker compose -f ./e2e/test/scenarios/docker-compose.yml up -d");
-  }
+  // if (options.START_CONTAINERS) {
+  // printBold("⏳ Starting containers");
+  // shell("docker compose -f ./e2e/test/scenarios/docker-compose.yml up -d");
+  // }
 
   if (options.BUILD_JAR) {
     printBold("⏳ Building backend");
-    shell("./bin/build-for-test");
-
+    // shell("./bin/build-for-test");
     if (options.START_BACKEND) {
       const isBackendRunning = shell(
         `lsof -ti:${options.BACKEND_PORT} || echo ""`,
@@ -87,7 +86,6 @@ const init = async () => {
         );
         process.exit(FAILURE_EXIT_CODE);
       }
-
       printBold("⏳ Starting backend");
       await CypressBackend.start();
     }
@@ -100,40 +98,40 @@ const init = async () => {
     );
   }
 
-  if (options.GENERATE_SNAPSHOTS) {
-    // reset cache
-    shell("rm -f e2e/support/cypress_sample_instance_data.json");
+  // if (options.GENERATE_SNAPSHOTS) {
+  //   // reset cache
+  //   shell("rm -f e2e/support/cypress_sample_instance_data.json");
 
-    printBold("⏳ Generating snapshots");
-    await runCypress("snapshot", cleanup);
-  } else {
-    printBold("Skipping snapshot generation, beware of stale snapshot caches");
-    shell("echo 'Existing snapshots:' && ls -1 e2e/snapshots");
-  }
+  //   printBold("⏳ Generating snapshots");
+  //   await runCypress("snapshot", cleanup);
+  // } else {
+  //   printBold("Skipping snapshot generation, beware of stale snapshot caches");
+  //   shell("echo 'Existing snapshots:' && ls -1 e2e/snapshots");
+  // }
 
-  const isFrontendRunning = shell("lsof -ti:8080 || echo ''", { quiet: true });
-  if (!isFrontendRunning && options.TEST_SUITE === "e2e") {
-    printBold(
-      "⚠️⚠️ You don't have your frontend running. You should probably run yarn build-hot ⚠️⚠️",
-    );
-  }
+  // const isFrontendRunning = shell("lsof -ti:8080 || echo ''", { quiet: true });
+  // if (!isFrontendRunning && options.TEST_SUITE === "e2e") {
+  //   printBold(
+  //     "⚠️⚠️ You don't have your frontend running. You should probably run yarn build-hot ⚠️⚠️",
+  //   );
+  // }
 
-  switch (options.TEST_SUITE) {
-    case "metabase-nodejs-react-sdk-embedding-sample-e2e":
-    case "metabase-nextjs-sdk-embedding-sample-e2e":
-    case "shoppy-e2e":
-      await startSampleAppContainers(options.TEST_SUITE);
-      break;
+  // switch (options.TEST_SUITE) {
+  //   case "metabase-nodejs-react-sdk-embedding-sample-e2e":
+  //   case "metabase-nextjs-sdk-embedding-sample-e2e":
+  //   case "shoppy-e2e":
+  //     await startSampleAppContainers(options.TEST_SUITE);
+  //     break;
 
-    case "vite-6-host-app-e2e":
-    case "next-15-app-router-host-app-e2e":
-    case "next-15-pages-router-host-app-e2e":
-    case "angular-20-host-app-e2e":
-      await startHostAppContainers(options.TEST_SUITE);
-      break;
-  }
+  //   case "vite-6-host-app-e2e":
+  //   case "next-15-app-router-host-app-e2e":
+  //   case "next-15-pages-router-host-app-e2e":
+  //   case "angular-20-host-app-e2e":
+  //     await startHostAppContainers(options.TEST_SUITE);
+  //     break;
+  // }
 
-  printBold("⏳ Starting Cypress");
+  // printBold("⏳ Starting Cypress");
   await runCypress(options.TEST_SUITE, cleanup);
 };
 

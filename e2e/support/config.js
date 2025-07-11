@@ -10,6 +10,7 @@ import {
   verifyDownloadTasks,
 } from "./commands/downloads/downloadUtils";
 import webpackConfig from "./component-webpack.config";
+import { seed } from "./db-seed";
 import * as dbTasks from "./db_tasks";
 import { signJwt } from "./helpers/e2e-jwt-tasks";
 
@@ -90,6 +91,11 @@ const defaultConfig = {
         sourcemap: "inline",
       }),
     );
+
+    on("before:run", async () => {
+      console.log(">>>>>>>>>>", "We're seeding the app db", "<<<<<<<<<<");
+      await seed();
+    });
 
     /********************************************************************
      **                         BROWSERS                               **
@@ -180,6 +186,7 @@ const defaultConfig = {
   // enable video recording in run mode
   video: true,
   videoCompression: true,
+  experimentalInteractiveRunEvents: true,
 };
 
 const mainConfig = {
