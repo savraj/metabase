@@ -751,32 +751,15 @@ export async function seed() {
           engine: "mongo",
           name: "QA Mongo",
           details: {
-            dbname: "sample",
-            host: "localhost",
-            port: 27004,
-            user: "metabase",
-            pass: "metasample123",
-            authdb: "admin",
-            "additional-options": null,
-            "use-srv": false,
+            "advanced-options": false,
+            "use-conn-uri": true,
+            "conn-uri":
+              "mongodb://metabase:metasample123@localhost:27004/sample?authSource=admin",
             "tunnel-enabled": false,
           },
           auto_run_queries: true,
           is_full_sync: true,
-          schedules: {
-            cache_field_values: {
-              schedule_day: null,
-              schedule_frame: null,
-              schedule_hour: 0,
-              schedule_type: "daily",
-            },
-            metadata_sync: {
-              schedule_day: null,
-              schedule_frame: null,
-              schedule_hour: null,
-              schedule_type: "hourly",
-            },
-          },
+          schedules,
         });
 
         await assertOnDatabaseMetadata("mongo");
