@@ -632,8 +632,6 @@ export async function seed() {
 
       await assertOnDatabaseMetadata("postgres");
       await snapshot("postgres-12");
-      await client.delete(`/api/database/${postgresID}`);
-      await client.post("/api/testing/restore/default");
 
       console.log("⚙️ Setting up writable postgres");
       const writablePgResults = await connectAndQueryDB({
@@ -647,33 +645,15 @@ export async function seed() {
         });
       }
 
-      const { id: writablePostgresID } = await client.post("/api/database", {
-        engine: "postgres",
-        name: "Writable Postgres12",
-        details: {
-          dbname: "writable_db",
-          host: "localhost",
-          port: 5404,
-          user: "metabase",
-          password: "metasample123",
-          authdb: null,
-          "additional-options": null,
-          "use-srv": false,
-          "tunnel-enabled": false,
-        },
-        auto_run_queries: true,
-        is_full_sync: true,
-        schedules,
-      });
-
-      await assertOnDatabaseMetadata("postgres");
-      if (writablePostgresID) {
-        await client.put(`/api/database/${writablePostgresID}`, {
+      if (postgresID) {
+        await client.put(`/api/database/${postgresID}`, {
+          details: {
+            dbname: "writable_db",
+          },
           settings: { "database-enable-actions": true },
         });
       }
       await snapshot("postgres-writable");
-      await client.delete(`/api/database/${writablePostgresID}`);
       await client.post("/api/testing/restore/default");
 
       /**
@@ -701,8 +681,6 @@ export async function seed() {
 
       await assertOnDatabaseMetadata("mysql");
       await snapshot("mysql-8");
-      await client.delete(`/api/database/${mysqlID}`);
-      await client.post("/api/testing/restore/default");
 
       console.log("⚙️ Setting up writable mysql");
       const writableMysqlResults = await connectAndQueryDB({
@@ -717,33 +695,16 @@ export async function seed() {
         });
       }
 
-      const { id: writableMysqlID } = await client.post("/api/database", {
-        engine: "mysql",
-        name: "Writable MySQL8",
-        details: {
-          dbname: "writable_db",
-          host: "localhost",
-          port: 3304,
-          user: "root",
-          password: "metasample123",
-          authdb: null,
-          "additional-options": "allowPublicKeyRetrieval=true",
-          "use-srv": false,
-          "tunnel-enabled": false,
-        },
-        auto_run_queries: true,
-        is_full_sync: true,
-        schedules,
-      });
-
-      await assertOnDatabaseMetadata("mysql");
-      if (writableMysqlID) {
-        await client.put(`/api/database/${writableMysqlID}`, {
+      if (mysqlID) {
+        await client.put(`/api/database/${mysqlID}`, {
+          details: {
+            user: "root",
+            dbname: "writable_db",
+          },
           settings: { "database-enable-actions": true },
         });
       }
       await snapshot("mysql-writable");
-      await client.delete(`/api/database/${writableMysqlID}`);
       await client.post("/api/testing/restore/default");
 
       // if (process.env.CYPRESS_QA_DB_MONGO) {
