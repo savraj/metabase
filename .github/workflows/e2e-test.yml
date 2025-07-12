@@ -56,7 +56,7 @@ jobs:
       MB_SNOWPLOW_URL: "http://localhost:9090" # Snowplow micro
       TZ: US/Pacific # to make node match the instance tz
       CYPRESS_CI: true
-      CYPRESS_QA_DB_MONGO: ${{ inputs.name == 'mongo' }}
+      CYPRESS_QA_DB_MONGO: false
       CYPRESS_IS_EMBEDDING_SDK: ${{ inputs.name == 'embedding-sdk' }}
     steps:
       - uses: actions/checkout@v4

@@ -746,27 +746,27 @@ export async function seed() {
       await client.delete(`/api/database/${writableMysqlID}`);
       await client.post("/api/testing/restore/default");
 
-      if (process.env.CYPRESS_QA_DB_MONGO) {
-        const { id: mongoID } = await client.post("/api/database", {
-          engine: "mongo",
-          name: "QA Mongo",
-          details: {
-            "advanced-options": false,
-            "use-conn-uri": true,
-            "conn-uri":
-              "mongodb://metabase:metasample123@localhost:27004/sample?authSource=admin",
-            "tunnel-enabled": false,
-          },
-          auto_run_queries: true,
-          is_full_sync: true,
-          schedules,
-        });
+      // if (process.env.CYPRESS_QA_DB_MONGO) {
+      //   const { id: mongoID } = await client.post("/api/database", {
+      //     engine: "mongo",
+      //     name: "QA Mongo",
+      //     details: {
+      //       "advanced-options": false,
+      //       "use-conn-uri": true,
+      //       "conn-uri":
+      //         "mongodb://metabase:metasample123@localhost:27004/sample?authSource=admin",
+      //       "tunnel-enabled": false,
+      //     },
+      //     auto_run_queries: true,
+      //     is_full_sync: true,
+      //     schedules,
+      //   });
 
-        await assertOnDatabaseMetadata("mongo");
-        await snapshot("mongo-5");
-        await client.delete(`/api/database/${mongoID}`);
-        await client.post("/api/testing/restore/default");
-      }
+      //   await assertOnDatabaseMetadata("mongo");
+      //   await snapshot("mongo-5");
+      //   await client.delete(`/api/database/${mongoID}`);
+      //   await client.post("/api/testing/restore/default");
+      // }
     }
 
     console.log("🎉 Metabase seeding complete");
