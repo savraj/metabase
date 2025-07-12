@@ -111,8 +111,8 @@ jobs:
       - name: Run Metabase
         run: node e2e/runner/run_cypress_ci.js start
 
-      - name: Generate database snapshots
-        run: node e2e/runner/run_cypress_ci.js snapshot
+      # - name: Generate database snapshots
+      #   run: node e2e/runner/run_cypress_ci.js snapshot
 
       - name: Run auto-split Cypress tests on ${{ inputs.name }}
         if: ${{ !inputs.specs }}

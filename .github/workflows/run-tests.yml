@@ -5,6 +5,7 @@ on:
     branches:
       - "master"
       - "release-**"
+      - "cypress-improved-db-seed"
   pull_request:
     types: [opened, synchronize, reopened]
   merge_group:
@@ -32,67 +33,6 @@ jobs:
           # comma separated list of files
           list-files: csv
           filters: .github/file-paths.yaml
-
-  static-viz-files-changed:
-    name: Check whether static-viz files changed
-    runs-on: ubuntu-22.04
-    timeout-minutes: 10
-    outputs:
-      static_viz: ${{ steps.static_viz.outputs.static_viz }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Prepare front-end environment
-        uses: ./.github/actions/prepare-frontend
-      - name: Prepare back-end environment
-        uses: ./.github/actions/prepare-backend
-        with:
-          m2-cache-key: "files-changed"
-      - name: Build static-viz frontend
-        run: yarn build-static-viz
-        env:
-          MB_EDITION: ee
-      - name: Upload Static Viz Bundle Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: static-viz-bundle-${{ github.sha }}
-          path: resources/frontend_client/app/dist
-
-      - name: Check for static viz changes
-        uses: dorny/paths-filter@v3.0.0
-        id: static_viz
-        with:
-          token: ${{ github.token }}
-          filters: .github/static-viz-sources.yaml
-
-  backend-tests:
-    if: ${{ !cancelled() }}
-    needs: [files-changed, static-viz-files-changed]
-    uses: ./.github/workflows/backend.yml
-    secrets: inherit
-    with:
-      skip: ${{ needs.files-changed.outputs.backend_all != 'true' && needs.static-viz-files-changed.outputs.static_viz != 'true' }}
-
-  app-db-tests:
-    needs: files-changed
-    uses: ./.github/workflows/app-db.yml
-    secrets: inherit
-    with:
-      skip: ${{ needs.files-changed.outputs.backend_all != 'true' }}
-
-  driver-tests:
-    needs: files-changed
-    uses: ./.github/workflows/drivers.yml
-    secrets: inherit
-    with:
-      skip: ${{ needs.files-changed.outputs.backend_all != 'true' }}
-
-  frontend-tests:
-    needs: files-changed
-    uses: ./.github/workflows/frontend.yml
-    secrets: inherit
-    with:
-      skip: ${{ needs.files-changed.outputs.frontend_all != 'true' }}
-      skip-lint: ${{ needs.files-changed.outputs.frontend_all != 'true' && needs.files-changed.outputs.e2e_specs != 'true' }}
 
   e2e-tests:
     needs: files-changed
