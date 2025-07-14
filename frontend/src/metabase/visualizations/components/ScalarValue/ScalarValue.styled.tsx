@@ -6,14 +6,14 @@ import { Icon } from "metabase/ui";
 
 const TITLE_LINE_HEIGHT_REM = 1.4;
 
-export const ScalarRoot = styled.div`
+export const ScalarRoot = styled.div<{ isSmartScalar?: boolean }>`
   position: relative;
   display: flex;
   flex: 1;
   flex-direction: column;
   flex-wrap: wrap;
   justify-content: center;
-  align-items: center;
+  align-items: ${(props) => (props.isSmartScalar ? "flex-start" : "center")};
   width: 100%;
   height: 100%;
 `;
@@ -36,15 +36,17 @@ export const ScalarValueWrapper = styled.h1<ScalarValueWrapperProps>`
 
 interface ScalarTitleContainerProps {
   lines: number;
+  isSmartScalar?: boolean;
 }
 
 export const ScalarTitleContainer = styled.div<ScalarTitleContainerProps>`
   line-height: ${TITLE_LINE_HEIGHT_REM}rem;
   max-height: ${(props) => props.lines * TITLE_LINE_HEIGHT_REM}rem;
   display: flex;
-  justify-content: center;
+  justify-content: ${(props) =>
+    props.isSmartScalar ? "flex-start" : "center"};
   align-items: flex-start;
-  padding: 0 ${space(1)};
+  padding: 0 ${(props) => space(props.isSmartScalar ? 2 : 1)};
   width: 100%;
 `;
 

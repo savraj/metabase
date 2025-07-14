@@ -122,9 +122,10 @@ export function SmartScalar({
   );
 
   return (
-    <ScalarWrapper>
+    <ScalarWrapper isSmartScalar>
       {isPeriodVisible(innerHeight) && <ScalarPeriod period={display.date} />}
       <ScalarContainer
+        isSmartScalar
         className={cx(
           DashboardS.fullscreenNormalText,
           DashboardS.fullscreenNightText,
@@ -168,7 +169,7 @@ function ScalarPeriod({
   onClick?: () => void;
 }) {
   return (
-    <ScalarTitleContainer data-testid="scalar-period" lines={1}>
+    <ScalarTitleContainer data-testid="scalar-period" lines={1} isSmartScalar>
       <Text
         component="h3"
         ta="center"
@@ -336,8 +337,7 @@ function PreviousValueComparison({
       <Flex
         wrap="wrap"
         align="center"
-        justify="center"
-        mx="sm"
+        ml="md"
         lh="1.5rem"
         c="var(--mb-color-text-secondary)"
         className={cx(

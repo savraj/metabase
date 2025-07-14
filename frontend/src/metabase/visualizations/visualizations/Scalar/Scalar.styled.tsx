@@ -9,10 +9,11 @@ import { Icon } from "metabase/ui";
 
 interface ScalarContainerProps {
   isClickable: boolean;
+  isSmartScalar?: boolean;
 }
 
 export const ScalarContainer = styled(Ellipsified)<ScalarContainerProps>`
-  padding: 0 ${space(1)};
+  padding: 0 ${(props) => space(props.isSmartScalar ? 2 : 1)};
   max-width: 100%;
   box-sizing: border-box;
 
