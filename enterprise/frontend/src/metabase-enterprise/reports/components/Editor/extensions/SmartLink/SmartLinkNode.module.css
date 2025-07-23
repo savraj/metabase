@@ -1,7 +1,7 @@
 .smartLink {
   color: var(--mb-color-brand);
   font-weight: 700;
-  padding: 0.25rem 0.25rem;
+  padding: 0.125rem;
   border-radius: var(--mantine-radius-sm);
   transition: 200ms background-color;
 

@@ -2,11 +2,16 @@ import { Node, mergeAttributes } from "@tiptap/core";
 import { type NodeViewProps, NodeViewWrapper } from "@tiptap/react";
 import { memo } from "react";
 
+import CS from "metabase/css/core/index.css";
 import Search from "metabase/entities/search";
+import { formatNumber } from "metabase/lib/formatting";
 import { useSelector } from "metabase/lib/redux";
 import { Icon } from "metabase/ui";
 import { getSearchIconName } from "metabase/visualizations/visualizations/LinkViz/EntityDisplay";
-import { getReportCard } from "metabase-enterprise/reports/selectors";
+import {
+  getReportCard,
+  getReportRawSeries,
+} from "metabase-enterprise/reports/selectors";
 
 import styles from "./SmartLinkNode.module.css";
 
@@ -71,14 +76,24 @@ export const SmartLinkComponent = memo(
   ({ node }: NodeViewProps) => {
     const { entityId } = node.attrs;
     const card = useSelector((state) => getReportCard(state, entityId));
+    const rawSeries = useSelector((state) =>
+      getReportRawSeries(state, entityId),
+    );
     if (!card) {
       return null;
     }
     const wrappedEntity = Search.wrapEntity({ ...card, model: "card" });
     const icon = getSearchIconName(wrappedEntity);
+    const getExtra = () => {
+      if (card.display === "scalar" && rawSeries?.length === 1) {
+        const { rows } = rawSeries[0].data;
+        return formatNumber(rows[0]);
+      }
+    };
+    const extra = getExtra();
 
     return (
-      <NodeViewWrapper as="span">
+      <NodeViewWrapper as="span" className={styles.smartLink}>
         <a
           href={`/question/${entityId}`}
           target="_blank"
@@ -87,10 +102,15 @@ export const SmartLinkComponent = memo(
             // Stop tiptap from opening this link twice
             e.stopPropagation();
           }}
-          className={styles.smartLink}
         >
           <Icon name={icon} className={styles.icon} />
           {card?.name}
+          {extra && (
+            <>
+              {": "}
+              <span className={CS.textHeavy}>{extra}</span>
+            </>
+          )}
         </a>
       </NodeViewWrapper>
     );
