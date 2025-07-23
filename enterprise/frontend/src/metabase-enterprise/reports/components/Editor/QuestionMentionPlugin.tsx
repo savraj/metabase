@@ -24,6 +24,8 @@ import type {
 
 const MODELS_TO_SEARCH: SearchModel[] = ["card", "dataset"];
 
+type InsertionMode = "mention" | "embed";
+
 interface SearchResultsFooterProps {
   isSelected?: boolean;
   onFooterSelect?: () => void;
@@ -73,6 +75,7 @@ export const QuestionMentionPlugin = ({
   const [mentionRange, setMentionRange] = useState<{
     from: number;
     to: number;
+    mode: InsertionMode;
   } | null>(null);
   const [anchorPos, setAnchorPos] = useState<{ x: number; y: number } | null>(
     null,
@@ -95,20 +98,7 @@ export const QuestionMentionPlugin = ({
 
     const updateHandler = () => {
       const { $from } = editor.state.selection;
-      const text = $from.nodeBefore?.text || "";
-
-      // Check if we're typing after "/" and it's the start of the paragraph
-      if (text.trimStart() === "/") {
-        const from = $from.pos - 1;
-        setMentionRange({ from, to: $from.pos });
-
-        // Get cursor position
-        const coords = editor.view.coordsAtPos(from);
-        setAnchorPos({ x: coords.left, y: coords.bottom });
-
-        setShowPopover(true);
-        setQuery("");
-      } else if (mentionRange && showPopover) {
+      if (mentionRange && showPopover) {
         // Check if we're still in mention mode
         const currentText = editor.state.doc.textBetween(
           mentionRange.from,
@@ -116,13 +106,43 @@ export const QuestionMentionPlugin = ({
           "",
         );
 
-        if (currentText.startsWith("/")) {
+        if (currentText.startsWith("/") || currentText.startsWith("@")) {
           setQuery(currentText.slice(1));
-          setMentionRange({ from: mentionRange.from, to: $from.pos });
+          setMentionRange({
+            from: mentionRange.from,
+            to: $from.pos,
+            mode: mentionRange.mode,
+          });
         } else {
           setShowPopover(false);
           setMentionRange(null);
         }
+      }
+
+      const text = $from.nodeBefore?.text || "";
+      const getInsertionMode = (): InsertionMode | null => {
+        // Check if we're typing after @
+        if (text.endsWith("@")) {
+          return "mention";
+        }
+        // Check if we're typing after "/" and it's the start of the paragraph
+        if (text.trimStart() === "/") {
+          return "embed";
+        }
+        return null;
+      };
+
+      const mode = getInsertionMode();
+      if (mode) {
+        const from = $from.pos - 1;
+        setMentionRange({ from, to: $from.pos, mode });
+
+        // Get cursor position
+        const coords = editor.view.coordsAtPos(from);
+        setAnchorPos({ x: coords.left, y: coords.bottom });
+
+        setShowPopover(true);
+        setQuery("");
       }
     };
 
@@ -167,21 +187,24 @@ export const QuestionMentionPlugin = ({
     }
 
     const wrappedItem = Search.wrapEntity(item, dispatch);
+    let chain = editor.chain().focus().deleteRange(mentionRange);
 
-    editor
-      .chain()
-      .focus()
-      .deleteRange(mentionRange)
-      .insertContent({
+    if (mentionRange.mode === "embed") {
+      chain = chain.insertContent({
         type: "questionEmbed",
         attrs: {
           questionId: wrappedItem.id,
           questionName: wrappedItem.name,
           model: wrappedItem.model,
         },
-      })
-      .run();
+      });
+    } else if (mentionRange.mode === "mention") {
+      chain = chain
+        .setLink({ href: "http://google.com" })
+        .insertContent(item.name);
+    }
 
+    chain.run();
     setShowPopover(false);
     setMentionRange(null);
   };
