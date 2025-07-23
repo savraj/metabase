@@ -162,6 +162,11 @@ const getRefs = (editor: any) => {
         id: node.attrs.questionId,
         name: node.attrs.customName || node.attrs.questionName,
       });
+    } else if (node.type.name === "smartLink") {
+      refs.push({
+        id: node.attrs.entityId,
+        name: "",
+      });
     }
   });
   return refs;

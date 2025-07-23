@@ -2,6 +2,12 @@ import { Node, mergeAttributes } from "@tiptap/core";
 import { type NodeViewProps, NodeViewWrapper } from "@tiptap/react";
 import { memo } from "react";
 
+import Search from "metabase/entities/search";
+import { useSelector } from "metabase/lib/redux";
+import { Icon } from "metabase/ui";
+import { getSearchIconName } from "metabase/visualizations/visualizations/LinkViz/EntityDisplay";
+import { getReportCard } from "metabase-enterprise/reports/selectors";
+
 import styles from "./SmartLinkNode.module.css";
 
 export interface SmartLinkAttributes {
@@ -56,16 +62,23 @@ export const SmartLinkNode = Node.create<{
   },
 
   renderText({ node }) {
+    // FIXME: This doesn't copy the link text right
     return `{{link:${node.attrs.model}:${node.attrs.entityId}}}`;
   },
 });
 
 export const SmartLinkComponent = memo(
   ({ node }: NodeViewProps) => {
-    const { model, entityId } = node.attrs;
+    const { entityId } = node.attrs;
+    const card = useSelector((state) => getReportCard(state, entityId));
+    if (!card) {
+      return null;
+    }
+    const wrappedEntity = Search.wrapEntity({ ...card, model: "card" });
+    const icon = getSearchIconName(wrappedEntity);
 
     return (
-      <NodeViewWrapper as="span" className={styles.smartLink}>
+      <NodeViewWrapper as="span">
         <a
           href={`/question/${entityId}`}
           target="_blank"
@@ -74,10 +87,10 @@ export const SmartLinkComponent = memo(
             // Stop tiptap from opening this link twice
             e.stopPropagation();
           }}
+          className={styles.smartLink}
         >
-          {model}
-          {": "}
-          {entityId}
+          <Icon name={icon} className={styles.icon} />
+          {card?.name}
         </a>
       </NodeViewWrapper>
     );
