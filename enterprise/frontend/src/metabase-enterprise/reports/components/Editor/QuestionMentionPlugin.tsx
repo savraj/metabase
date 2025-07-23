@@ -97,8 +97,8 @@ export const QuestionMentionPlugin = ({
       const { $from } = editor.state.selection;
       const text = $from.nodeBefore?.text || "";
 
-      // Check if we're typing after @
-      if (text && text.endsWith("@")) {
+      // Check if we're typing after "/" and it's the start of the paragraph
+      if (text.trimStart() === "/") {
         const from = $from.pos - 1;
         setMentionRange({ from, to: $from.pos });
 
@@ -116,7 +116,7 @@ export const QuestionMentionPlugin = ({
           "",
         );
 
-        if (currentText.startsWith("@")) {
+        if (currentText.startsWith("/")) {
           setQuery(currentText.slice(1));
           setMentionRange({ from: mentionRange.from, to: $from.pos });
         } else {
