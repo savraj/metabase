@@ -12,6 +12,7 @@ import {
   serializeToMarkdown,
 } from "./extensions/MarkdownExtensions";
 import { QuestionEmbed } from "./extensions/QuestionEmbed";
+import { SmartLinkEmbed } from "./extensions/SmartLink";
 
 interface EditorProps {
   onEditorReady?: (editor: any) => void;
@@ -32,6 +33,11 @@ export const Editor: React.FC<EditorProps> = ({
       QuestionEmbed.configure({
         HTMLAttributes: {
           class: "question-embed",
+        },
+      }),
+      SmartLinkEmbed.configure({
+        HTMLAttributes: {
+          class: "smart-link",
         },
       }),
       MarkdownSerializer,

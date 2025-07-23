@@ -45,6 +45,8 @@ export function serializeToMarkdown(doc: ProseMirrorNode): string {
           } else {
             paragraphContent += `{{card:${child.attrs.questionId}}}`;
           }
+        } else if (child.type.name === "smartLink") {
+          paragraphContent += `{{link:${child.attrs.model}:${child.attrs.entityId}}}`;
         }
       });
       markdown += paragraphContent + "\n\n";
@@ -70,6 +72,8 @@ export function serializeToMarkdown(doc: ProseMirrorNode): string {
       } else {
         markdown += `{{card:${node.attrs.questionId}}}\n\n`;
       }
+    } else if (node.type.name === "smartLink") {
+      markdown += `{{link:question:${node.attrs.entityId}}}\n\n`;
     } else if (node.type.name === "codeBlock") {
       markdown += `\`\`\`${node.attrs.language || ""}\n${node.textContent}\n\`\`\`\n\n`;
     } else {
@@ -88,6 +92,9 @@ export function parseMarkdownToHTML(markdown: string): string {
         return `<div data-type="question-embed" data-question-id="${id}" data-custom-name="${customName}" data-model="card"></div>`;
       }
       return `<div data-type="question-embed" data-question-id="${id}" data-model="card"></div>`;
+    })
+    .replace(/{{link:(\w+):(\d+)}}/g, (match, model, entityId) => {
+      return `<span data-type="smart-link" data-model="${model}" data-entity-id="${entityId}"></span>`;
     })
     .replace(/^### (.*$)/gim, "<h3>$1</h3>")
     .replace(/^## (.*$)/gim, "<h2>$1</h2>")

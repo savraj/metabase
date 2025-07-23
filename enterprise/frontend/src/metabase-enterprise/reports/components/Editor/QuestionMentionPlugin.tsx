@@ -199,9 +199,13 @@ export const QuestionMentionPlugin = ({
         },
       });
     } else if (mentionRange.mode === "mention") {
-      chain = chain
-        .setLink({ href: "http://google.com" })
-        .insertContent(item.name);
+      chain = chain.insertContent({
+        type: "smartLink",
+        attrs: {
+          entityId: wrappedItem.id,
+          model: wrappedItem.model,
+        },
+      });
     }
 
     chain.run();
