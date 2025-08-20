@@ -227,8 +227,6 @@
              (assert (not (instance? ManyToManyChannel result)) "QP should not return a core.async channel.")
              (when (or (instance? Throwable result)
                        (= (:status result) :failed))
-               (prn (keys result))
-               (prn result)
                (streaming-response/write-error! os result export-format (cond
                                                                           (-> result :error_type qp.error-type/permission-error?)
                                                                           403
