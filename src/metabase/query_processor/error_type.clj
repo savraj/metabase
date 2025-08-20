@@ -46,8 +46,8 @@
   :parent client)
 
 (defn permission-error?
-  [error-type]
   "Is `error-type` a permissions error"
+  [error-type]
   (= missing-required-permissions error-type))
 
 (deferror bad-configuration
