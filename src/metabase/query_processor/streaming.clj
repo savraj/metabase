@@ -5,6 +5,7 @@
    [metabase.legacy-mbql.util :as mbql.u]
    [metabase.lib.schema.common :as lib.schema.common]
    [metabase.models.visualization-settings :as mb.viz]
+   [metabase.query-processor.error-type :as qp.error-type]
    [metabase.query-processor.pipeline :as qp.pipeline]
    [metabase.query-processor.schema :as qp.schema]
    [metabase.query-processor.streaming.csv :as qp.csv]
@@ -226,7 +227,15 @@
              (assert (not (instance? ManyToManyChannel result)) "QP should not return a core.async channel.")
              (when (or (instance? Throwable result)
                        (= (:status result) :failed))
-               (streaming-response/write-error! os result export-format)))))))))
+               (prn (keys result))
+               (prn result)
+               (streaming-response/write-error! os result export-format (cond
+                                                                          (-> result :error_type qp.error-type/permission-error?)
+                                                                          403
+                                                                          (-> result :error_type qp.error-type/client-error?)
+                                                                          400
+                                                                          :else
+                                                                          500))))))))))
 
 (defn transforming-query-response
   "Decorate the streaming rff to transform the top-level payload."
