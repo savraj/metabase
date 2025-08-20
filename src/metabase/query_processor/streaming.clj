@@ -202,6 +202,24 @@
     (binding [qp.pipeline/*result* (streaming-result-fn results-writer os)]
       (f rff))))
 
+(defn- status-code
+  "Get a status code for the supplied error object."
+  [err]
+  (cond
+    ;; If the error is setting its own status code use that
+    (:status-code err) (:status-code err)
+    ;; If the error is setting its own status code use that
+    (-> err :ex-data :status-code) (-> err :ex-data :status-code)
+    ;; If this is a permission error return 403
+    (-> err :error_type qp.error-type/permission-error?)
+    403
+    ;; If this is a client error return 400
+    (-> err :error_type qp.error-type/client-error?)
+    400
+    ;; Use 500 for all other error statuses
+    :else
+    500))
+
 (defn -streaming-response
   "Impl for [[streaming-response]]."
   ^StreamingResponse [export-format filename-prefix f]
@@ -227,13 +245,7 @@
              (assert (not (instance? ManyToManyChannel result)) "QP should not return a core.async channel.")
              (when (or (instance? Throwable result)
                        (= (:status result) :failed))
-               (streaming-response/write-error! os result export-format (cond
-                                                                          (-> result :error_type qp.error-type/permission-error?)
-                                                                          403
-                                                                          (-> result :error_type qp.error-type/client-error?)
-                                                                          400
-                                                                          :else
-                                                                          500))))))))))
+               (streaming-response/write-error! os result export-format (status-code result))))))))))
 
 (defn transforming-query-response
   "Decorate the streaming rff to transform the top-level payload."
