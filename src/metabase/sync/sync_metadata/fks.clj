@@ -196,38 +196,37 @@
                    ;; FK relationships that exist in DB but not in Metabase (need to be added/updated)
                    fks-to-add (set/difference db-fk-metadata our-fk-metadata)
                    ;; FK relationships that exist in Metabase but not in DB (need to be cleared)
-                   fks-to-clear (set/difference our-fk-metadata db-fk-metadata)]
-
-               ;; Process FK additions/updates
-               (let [add-results (transduce (map (fn [x]
-                                                   (let [[updated failed] (try [(mark-fk! database x) 0]
+                   fks-to-clear (set/difference our-fk-metadata db-fk-metadata)
+                   ;; Process FK additions/updates
+                   add-results (transduce (map (fn [x]
+                                                 (let [[updated failed] (try [(mark-fk! database x) 0]
+                                                                             (catch Exception e
+                                                                               (log/error e)
+                                                                               [0 1]))]
+                                                   {:total-fks 1
+                                                    :updated-fks updated
+                                                    :total-failed failed})))
+                                          (partial merge-with +)
+                                          {:total-fks 0
+                                           :updated-fks 0
+                                           :total-failed 0}
+                                          fks-to-add)
+                     ;; Process FK removals
+                   clear-results (transduce (map (fn [x]
+                                                   (let [[cleared failed] (try [(clear-fk! database x) 0]
                                                                                (catch Exception e
                                                                                  (log/error e)
                                                                                  [0 1]))]
-                                                     {:total-fks 1
-                                                      :updated-fks updated
+                                                     {:cleared-fks 1
+                                                      :updated-fks cleared
                                                       :total-failed failed})))
                                             (partial merge-with +)
-                                            {:total-fks 0
+                                            {:cleared-fks 0
                                              :updated-fks 0
                                              :total-failed 0}
-                                            fks-to-add)
-                     ;; Process FK removals
-                     clear-results (transduce (map (fn [x]
-                                                     (let [[cleared failed] (try [(clear-fk! database x) 0]
-                                                                                 (catch Exception e
-                                                                                   (log/error e)
-                                                                                   [0 1]))]
-                                                       {:cleared-fks 1
-                                                        :updated-fks cleared
-                                                        :total-failed failed})))
-                                              (partial merge-with +)
-                                              {:cleared-fks 0
-                                               :updated-fks 0
-                                               :total-failed 0}
-                                              fks-to-clear)]
+                                            fks-to-clear)]
                  ;; Combine results
-                 (merge-with + add-results clear-results {:total-fks (+ (count fks-to-add) (count fks-to-clear))}))))
+               (merge-with + add-results clear-results {:total-fks (+ (count fks-to-add) (count fks-to-clear))})))
     ;; Mark the table as done with its initial sync once this step is done even if it failed, because only
     ;; sync-aborting errors should be surfaced to the UI (see
     ;; `:metabase.sync.util/exception-classes-not-to-retry`).
