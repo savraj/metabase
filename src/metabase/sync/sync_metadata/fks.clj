@@ -211,7 +211,7 @@
                                            :updated-fks 0
                                            :total-failed 0}
                                           fks-to-add)
-                     ;; Process FK removals
+                   ;; Process FK removals
                    clear-results (transduce (map (fn [x]
                                                    (let [[cleared failed] (try [(clear-fk! database x) 0]
                                                                                (catch Exception e
@@ -225,7 +225,7 @@
                                              :updated-fks 0
                                              :total-failed 0}
                                             fks-to-clear)]
-                 ;; Combine results
+               ;; Combine results
                (merge-with + add-results clear-results {:total-fks (+ (count fks-to-add) (count fks-to-clear))})))
     ;; Mark the table as done with its initial sync once this step is done even if it failed, because only
     ;; sync-aborting errors should be surfaced to the UI (see
