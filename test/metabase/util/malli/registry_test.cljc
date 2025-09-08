@@ -129,7 +129,8 @@
       [:ref ::location])))
 
 (deftest lazy-explainer-generation-test
-  (with-redefs [mc/explainer (fn [& _] (throw (ex-info "no explainer creation expected" {})))]
+  (with-redefs [#_:clj-kondo/ignore
+                mc/explainer (fn [& _] (throw (ex-info "no explainer creation expected" {})))]
     ;; adding :rand so they don't get cached:
     (is (nil? ((mr/explainer [:int {:rand (rand)}]) 1)))
     (is (nil? (mr/explain [:int {:rand (rand)}] 1)))

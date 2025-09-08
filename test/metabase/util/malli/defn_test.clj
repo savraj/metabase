@@ -207,7 +207,8 @@
     (inc x)))
 
 (deftest lazy-explainer-generation-test
-  (with-redefs [mc/explainer (fn [& _] (throw (ex-info "no explainer creation expected" {})))]
+  (with-redefs [#_:clj-kondo/ignore
+                mc/explainer (fn [& _] (throw (ex-info "no explainer creation expected" {})))]
     (is (= 3 (my-increment 2)))
     (is (thrown-with-msg?
          clojure.lang.ExceptionInfo
