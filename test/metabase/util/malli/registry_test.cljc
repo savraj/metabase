@@ -135,10 +135,12 @@
     (is (nil? ((mr/explainer [:int {:rand (rand)}]) 1)))
     (is (nil? (mr/explain [:int {:rand (rand)}] 1)))
     (is (thrown-with-msg?
+         #_:clj-kondo/ignore
          clojure.lang.ExceptionInfo
          #"no explainer creation expected"
          ((mr/explainer [:int {:rand (rand)}]) "not an integer")))
     (is (thrown-with-msg?
+         #_:clj-kondo/ignore
          clojure.lang.ExceptionInfo
          #"no explainer creation expected"
          (mr/explain [:int {:rand (rand)}] "not an integer")))))
