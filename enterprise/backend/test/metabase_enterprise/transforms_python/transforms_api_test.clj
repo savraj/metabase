@@ -315,8 +315,6 @@
                    :db_id  (:id target-db)}
                   (:table response))))))))
 
-(mt/set-test-drivers! #{:postgres})
-
 (deftest python-transform-schema-change-integration-test
   (testing "Python transform handles schema changes using appropriate rename strategy"
     (mt/test-drivers (disj (mt/normal-drivers-with-feature :transforms/python)
