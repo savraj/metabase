@@ -296,6 +296,7 @@
     :public-xlsx-download nil
     :dashboard-subscription nil
     :pulse nil
+    :map-tiles nil
     context))
 
 (mu/defn process-query-for-card
