@@ -144,7 +144,6 @@ export function PythonTransformEditor({
       />
       <Stack w="100%" h="100%" gap={0}>
         <PythonEditorBody
-          isRunnable={isRunnable && isPythonTransformSource(source)}
           isRunning={isRunning}
           isDirty={isDirty}
           onRun={run}
