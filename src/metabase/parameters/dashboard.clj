@@ -100,7 +100,7 @@
 (defn- cards-with-filters?
   "Does param-key have any card with filter mapped?"
   [dashboard param-key]
-  (boolean (cards-with-filters dashboard param-key)))
+  (boolean (seq (cards-with-filters dashboard param-key))))
 
 (mu/defn chain-filter :- ms/FieldValuesResult
   "C H A I N filters!
