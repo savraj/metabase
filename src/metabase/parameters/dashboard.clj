@@ -83,22 +83,22 @@
                  2 second
                  1 first)))))
 
-;; TODO: This should work across all stages.
 (defn- cards-with-filters
   "Lazy seq of cards from `dashboard` that are mapped to param to `param-key` and contain some filters.
-  Currently only last stage considered."
+  Dashboard is expected to have hydrated `:resolved-params`."
   [dashboard param-key]
-  (for [mapping (get-in dashboard [:resolved-params param-key])
+  (for [mapping (get-in dashboard [:resolved-params param-key :mappings])
         :let [card (get-in mapping [:dashcard :card])
               query (:dataset_query card)
               modern-query (lib/->pMBQL query)]
         ;; Yes, this is paranoid. Let's be rather safe than sorry.
-        :when (seq (when (not-empty modern-query)
-                     (lib/filters modern-query)))]
-    mapping))
+        :when (when (not-empty modern-query)
+                (m/find-first (partial lib/filters modern-query)
+                              (range (lib/stage-count modern-query))))]
+    card))
 
 (defn- cards-with-filters?
-  "Does param-key have any card with filter mapped?"
+  "Does param-key have any card with filter mapped? Dashboard is expected to have hydrate `:resolved-params`."
   [dashboard param-key]
   (boolean (seq (cards-with-filters dashboard param-key))))
 
@@ -120,7 +120,6 @@
          field-ids   (into #{} (map :field-id (param->fields param)))]
      (if (or (empty? field-ids)
              (cards-with-filters? dashboard param-key))
-       ;; following might be used?
        (or (filter-values-from-field-refs dashboard param-key)
            (throw (ex-info (tru "Parameter {0} does not have any Fields associated with it" (pr-str param-key))
                            {:param       (get (:resolved-params dashboard) param-key)
