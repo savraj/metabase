@@ -800,3 +800,31 @@
                 [nil 1 3]]
                (mt/rows
                 (qp.pivot/run-pivot-query query))))))))
+
+#_{:clj-kondo/ignore [:metabase/disallow-hardcoded-driver-names-in-tests]}
+(deftest pivot-table-from-native-mongo-query-test
+  (testing "#64124"
+    (mt/test-drivers #{:mongo}
+      (qp.store/with-metadata-provider
+        (lib.tu/mock-metadata-provider
+         (mt/metadata-provider)
+         (mt/dataset test-data
+           (mt/with-temp [:model/Card native-card {:dataset_query
+                                                   {:type     :native
+                                                    :native   {:collection "orders"
+                                                               :query      "[{\"$project\": {\"_id\": 0, \"PRODUCT_ID\": 1, \"QUANTITY\": 1}}]"}
+                                                    :database (mt/id)}
+                                                   :database_id (mt/id)}]
+             (let [query {:database (mt/id)
+                          :type     :query
+                          :query    {:source-table (str "card__" (:id native-card))
+                                     :aggregation  [[:count]]
+                                     :breakout     [[:field "PRODUCT_ID" {:base-type :type/Integer}]
+                                                    [:field "QUANTITY" {:base-type :type/Integer}]]}}
+                   pivot-settings {:pivot_table.column_split {:rows    ["PRODUCT_ID"]
+                                                              :columns ["QUANTITY"]
+                                                              :values  ["count"]}}
+                   result (qp/process-query (assoc query :visualization_settings pivot-settings))]
+               (is (= (count (:cols (:data result)))
+                      (count (first (:rows (:data result)))))
+                   "Result must contain as many columns as there items in each row.")))))))))
