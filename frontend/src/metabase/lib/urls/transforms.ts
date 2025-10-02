@@ -1,8 +1,8 @@
 import { PLUGIN_TRANSFORMS } from "metabase/plugins";
 import type { Transform } from "metabase-types/api";
-const ROOT_URL = PLUGIN_TRANSFORMS.ROOT_URL;
 
 const ROOT_URL = PLUGIN_TRANSFORMS.ROOT_URL;
+
 export function transforms() {
   return ROOT_URL;
 }
